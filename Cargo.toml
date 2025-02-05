@@ -1,6 +1,7 @@
 [profile.release]
 strip = true
 lto = "fat"
+debug = false  
 
 [package]
 name = "background-remover"
@@ -8,6 +9,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+fast_image_resize = "5.1.1"
 image = "0.25.5"
 onnxruntime = "0.0.14"
-
+rayon = "1.10.0"
+num_cpus = "1.13.0"
