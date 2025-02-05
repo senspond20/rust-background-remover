@@ -39,11 +39,13 @@ background-remover/
 ## 빠른 실행 
 
 ### Windows
-- https://drive.google.com/file/d/1cGUtzZIeQww7iXJ14sQCSaIm6vZi4TJh/view?usp=sharing
+- https://drive.google.com/file/d/1BQMLExdjsdh-zon71bb1UpTy_V72rhju/view?usp=drive_link
 
-구글 드라이브에 다운로드를 하세요.
+- 윈도우 10/11 까지 확인
 
-<img src="./screenshot/0.png" width="25%">
+구글 드라이브에 다운로드를 하고 압축을 푸세요.
+
+<img src="./screenshot/0.png" width="55%">
 
 input 디렉토리에 인물 이미지들을 넣으세요.
 

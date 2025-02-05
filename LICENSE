@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2025 senspond20
+Copyright (c) 2025 senspond20 (RGB Coding)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,3 +19,22 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+### Third-party Licenses
+This project includes components that are licensed under Apache License 2.0.
+See the "NOTICE" file for details.
+
+This project contains third-party code that is licensed under the Apache License 2.0.
+
+The following components are licensed under Apache License 2.0:
+
+- ModeNet (source files: modenet.onnx)
+
+Copyright (c) 2025 ZHKKKe
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
