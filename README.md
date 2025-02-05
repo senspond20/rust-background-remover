@@ -35,14 +35,45 @@ background-remover/
 
 ## 🔧 설치 및 실행 방법
 
-### 1️⃣ Rust 프로젝트 빌드
+
+## 빠른 실행 
+
+### Windows
+- https://drive.google.com/file/d/1cGUtzZIeQww7iXJ14sQCSaIm6vZi4TJh/view?usp=sharing
+
+구글 드라이브에 다운로드를 하세요.
+
+<img src="./screenshot/0.png" width="25%">
+
+input 디렉토리에 인물 이미지들을 넣으세요.
+
+<img src="./screenshot/1.png" width="70%">
+
+예제로 들어간 이미지는 스테이블 디퓨전으로 생성되었습니다
+
+background-remover.exe 파일을 실행하세요.
+
+<img src="./screenshot/2.png" width="80%">
+
+작업이 완료되면 output 디렉토리를 확인하세요.
+
+
+
+## Rust 프로젝트 빌드
+
 ```sh
 git clone https://github.com/your-repo/rust-background-remover.git
 cd rust-background-remover
 cargo build --release
 ```
 
-### 라이선스
+## Rust 프로젝트 실행
+
+```sh
+cargo run
+```
+
+## 라이선스
 - 본 프로젝트는 **MIT License**를 사용합니다.
 - MODNet은 **Apache 2.0** 라이선스를 사용합니다.
 
