@@ -4,3 +4,4 @@
 *.exe
 *.zip
 *.dll
+/input2

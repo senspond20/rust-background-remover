@@ -18,7 +18,7 @@ pub fn process_image(
 
     let img :ImageBuffer<image::Rgba<u8>, Vec<u8>> = open(input_path)?.into_rgba8(); 
     let (width, height) = img.dimensions();
-    println!("▶️ Size :{}x{}", width, height);
+    println!("▶️ Size : {}x{}", width, height);
 
     let input_tensor = preprocess_image(&img, width, height)?;
     // let input_tensor = image_processor::preprocess_image(input_path.to_str().unwrap())?;
