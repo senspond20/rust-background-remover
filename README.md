@@ -39,7 +39,6 @@ background-remover/
 ## 빠른 실행 
 
 **release** : https://github.com/senspond20/rust-background-remover/releases/
-- https://drive.google.com/file/d/1BQMLExdjsdh-zon71bb1UpTy_V72rhju/view?usp=drive_link
 
 **modnet.onnx** : https://drive.google.com/drive/folders/1WFq2nHFL7ZIvIp7O-CEXgDyeBLTKPhE-?usp=drive_link
 
