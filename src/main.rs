@@ -24,6 +24,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!("{}\n", "*".repeat(90));
 
     let input_dir = Path::new("input");
+    let temp_dir = Path::new("temp");
     let output_dir = Path::new("output");
 
    // 디렉토리 확인 및 생성
@@ -34,6 +35,9 @@ fn main() -> Result<(), Box<dyn Error>> {
    
     if !output_dir.exists() {
       fs::create_dir(output_dir)?;
+    }
+    if !temp_dir.exists() {
+      fs::create_dir(temp_dir)?;
     }
     // input 디렉토리에 파일이 있는지 확인
     let files: Vec<_> = fs::read_dir(input_dir)?.filter_map(|entry| entry.ok()).collect();
@@ -87,7 +91,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!("인물 배경제거 AI모델이 성공적으로 로드되었습니다!\n");
     println!("************* 작업을 시작합니다 *************");
      // 디렉토리 순회하며 배경제거 수행
-    process_directory(input_dir, output_dir, &mut session)?;
+    process_directory(input_dir, temp_dir, output_dir, &mut session)?;
     // process_directory(input_dir, output_dir, session);
 
     println!("모든 처리가 완료되었습니다. 'output' 디렉토리를 확인하세요.");
@@ -103,6 +107,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 fn process_directory(
     input_dir: &Path,
+    temp_dir : &Path,
     output_dir: &Path,
     session: &mut onnxruntime::session::Session<'_>,
 ) -> std::io::Result<()> {
@@ -124,12 +129,12 @@ fn process_directory(
                     if ext.to_str() == Some("webp") {
                         match image_decoder::convert_webp(path.to_str().unwrap()) {
                             Ok(image) => {
-                                let temp_path = input_dir.join(path.file_stem().unwrap()).with_extension("png");
+                                let temp_path = temp_dir.join(path.file_stem().unwrap()).with_extension("png");
                                 if let Err(e) = image.save(&temp_path) {
                                     println!("webp 변환 실패: {:?}, {}", path.display(), e);
                                     continue;
                                 }
-                                println!("webp To png: {:?}", temp_path.display());
+                                println!("webp -> png: {:?}", temp_path.display());
                                 temp_path
                             }
                             Err(e) => {
