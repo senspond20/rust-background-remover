@@ -27,7 +27,7 @@ pub fn convert_webp(input_path: &str) -> Result<DynamicImage, Box<dyn std::error
 
 
 // /**
-//  * AVIF 이미지를 DynamicImage로 변환
+//  * TODO : AVIF 이미지를 DynamicImage로 변환
 //  */
 // pub fn convert_avif(input_path: &str, output_path: &str) -> Result<DynamicImage, Box<dyn std::error::Error>> {
 //     // AVIF 파일 읽기

@@ -29,7 +29,9 @@ pub fn process_image(
 
     // ONNX 추론 수행
     let outputs: Vec<OrtOwnedTensor<f32, _>> = session.run(vec![input_tensor.into()])?;
-    let mask_tensor = outputs[0].view().into_shape((1, 1, re_height, re_width))?;
+
+    // 마스크 텐서는 흑백, 1채널로 밝기 정보만 가지고 있기 때문에 [1, 1, H, W] 형태로 변환
+    let mask_tensor = outputs[0].view().into_shape((1, 1, re_height, re_width))?; 
 
     
     let resized_mask = if re_width == width as usize && re_height == height as usize {
@@ -62,7 +64,7 @@ pub fn process_image(
  * 개발 디버깅시는 안빠른데, 릴리즈 빌드하면 빠름
  * OpenCV 리사이즈 보다 빠른지는 비교실험 필요
  * 
- * SIMD 최적화를 하려면 U8x4 연산을 해야함
+ * SIMD 최적화를 하려면 U8x3보다는는 U8x4 연산을 해야, CPU에서 메모리 정렬 문제 등에서 보다 효율적으로 처리가능함
  * 
  */
 pub fn fast_resize(img: &ImageBuffer<Rgba<u8>, Vec<u8>>, new_width: u32, new_height: u32) -> ImageBuffer<Rgba<u8>, Vec<u8>> {
@@ -95,7 +97,8 @@ pub fn fast_resize(img: &ImageBuffer<Rgba<u8>, Vec<u8>>, new_width: u32, new_hei
  * 이미지 전처리 함수 (RGB → BCHW 변환)
  
  - ModNet 최적화 : 평균 (0.5, 0.5, 0.5), 표준편차 (0.5, 0.5, 0.5) 정규화
-
+ - 이 정규화를 적용하면 [0, 1] 범위의 픽셀 값이 [-1, 1]로 변환됨.
+ - 실험해보니 [0, 1] 정규화보다 평균이 0이고, 값 범위가 균등한 데이터에서 좀더 잘 동작함
  */
 fn preprocess_image(
     img: &ImageBuffer<Rgba<u8>, Vec<u8>>, 
@@ -130,11 +133,11 @@ fn preprocess_image(
  * 입력 차원 조정 함수
  
  - MODNet 모델은 32의 배수 크기만 입력 가능하므로 입력 이미지 크기를 32의 배수로 조정해야 함
-  - 가로/세로 중 큰 쪽을 ref_size로 맞추고, 비율을 유지한 상태에서 32의 배수로 조정.
-
+ - 가로/세로 중 큰 쪽을 ref_size로 맞추고, 비율을 유지한 상태에서 32의 배수로 조정.
+ - 32의 배수는 항상 짝수 : 홀수 입력보다 짝수입력이 안정적으로 동작
  */
 fn resize_dimensions(width: u32, height: u32, ref_size: u32) -> (u32, u32) {
-    let max_size = width.max(height); // ✅ 큰 값 선택
+    let max_size = width.max(height); // 큰 값 선택
 
     let (mut new_width, mut new_height) = if max_size > ref_size {
         if width >= height {
