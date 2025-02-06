@@ -38,27 +38,25 @@ background-remover/
 
 ## 빠른 실행 
 
-### Windows
+**release** : https://github.com/senspond20/rust-background-remover/releases/
 - https://drive.google.com/file/d/1BQMLExdjsdh-zon71bb1UpTy_V72rhju/view?usp=drive_link
 
-- 윈도우 10/11 까지 확인
+**modnet.onnx** : https://drive.google.com/drive/folders/1WFq2nHFL7ZIvIp7O-CEXgDyeBLTKPhE-?usp=drive_link
 
-구글 드라이브에 다운로드를 하고 압축을 푸세요.
+
+### Windows
+
+**release**에서 bg-remover-release-windows.zip 을 다운 받고 압축을 푸세요
+background-remover.exe 파일이 있는 경로에 **modnet.onnx** 파일을 집어 넣으세요
 
 <img src="./screenshot/0.png" width="55%">
 
 input 디렉토리에 인물 이미지들을 넣으세요.
-
-<img src="./screenshot/1.png" width="70%">
-
-예제로 들어간 이미지는 스테이블 디퓨전으로 생성되었습니다
-
 background-remover.exe 파일을 실행하세요.
 
 <img src="./screenshot/2.png" width="80%">
 
 작업이 완료되면 output 디렉토리를 확인하세요.
-
 
 
 ## Rust 프로젝트 빌드
@@ -67,12 +65,6 @@ background-remover.exe 파일을 실행하세요.
 git clone https://github.com/your-repo/rust-background-remover.git
 cd rust-background-remover
 cargo build --release
-```
-
-## Rust 프로젝트 실행
-
-```sh
-cargo run
 ```
 
 ## 라이선스
