@@ -1,19 +1,24 @@
 mod image_processor;
+mod image_decoder;
 use onnxruntime::{environment::Environment, LoggingLevel, GraphOptimizationLevel};
 use std::error::Error;
+use std::path::Path;
 use std::{fs, io};
-use std::path::{Path};
 use std::time::Instant;
 use num_cpus;
+
+const SUPPORTED_EXTS: [&str; 4] = ["jpg", "jpeg", "png",  "webp"];
+// "avif" Cmake 빌드 필요
 
 fn main() -> Result<(), Box<dyn Error>> {
     println!("{}", "*".repeat(90));
     println!("[이미지 배경 제거 프로그램]");
     println!("- 제작자 : RGB코딩");
-    println!("- Version : 1.0.1\n");
+    println!("- Version : 1.0.2\n");
     println!("[프로그램 소개]");
-    println!("input 디렉토리에 있는 .jpg .png 이미지 파일들의 배경 제거하여 output 디렉토리에 저장합니다.");
-    println!("! 인물 이미지만 잘 작동합니다\n");
+    println!("input 디렉토리에 있는 이미지 파일들의 배경 제거하여 output 디렉토리에 저장합니다.");
+    println!("* 지원 파일 포맷 : {}", SUPPORTED_EXTS.join(", "));
+    println!("* 인물 이미지만 잘 작동합니다\n");
     println!("* 공유는 자유지만, 원작자 표기는 부탁드립니다 ");
     println!("👉 https://www.youtube.com/@rgbitcode");
     println!("{}\n", "*".repeat(90));
@@ -37,7 +42,21 @@ fn main() -> Result<(), Box<dyn Error>> {
         println!("'input' 디렉토리에 파일이 없습니다. 이미지를 추가한 후 다시 실행하세요.");
         return Ok(());
     }
-    println!("input 디렉토리에 총 {}개의 이미지가 발견되었습니다.", files.len());
+    let supported_files: Vec<_> = files.iter()
+    .filter(|entry| {
+        if let Some(ext) = entry.path().extension() {
+            SUPPORTED_EXTS.contains(&ext.to_str().unwrap_or("").to_lowercase().as_str())
+        } else {
+            false
+        }
+    })
+    .collect();
+
+    println!(
+        "input 디렉토리에 총 {}개의 파일이 발견되었으며, 그 중 {}개가 지원되는 파일입니다.",
+        files.len(),
+        supported_files.len()
+    );
     println!("작업을 수행하시려면 엔터 키를 눌러주세요...");
 
     let mut input = String::new();
@@ -65,8 +84,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         .expect("** 모델 로딩에 실패하였습니다. modnet.onnx 파일이 .exe 파일 경로에 존재하는지 확인해주세요**"); 
         
 
-    println!("모델이 성공적으로 로드되었습니다!\n");
-    
+    println!("인물 배경제거 AI모델이 성공적으로 로드되었습니다!\n");
     println!("************* 작업을 시작합니다 *************");
      // 디렉토리 순회하며 배경제거 수행
     process_directory(input_dir, output_dir, &mut session)?;
@@ -98,15 +116,42 @@ fn process_directory(
 
             // 파일 확장자 확인 (이미지 파일만 처리)
             if let Some(ext) = path.extension() {
-                if ext == "jpg" || ext == "jpeg" || ext == "png" {
-                    let output_file = output_dir.join(path.file_name().unwrap());
+                if SUPPORTED_EXTS.contains(&ext.to_str().unwrap_or("")) {
+
+                    println!("▶️ Input : {:?}", path.display());
+
+                    // WebP 파일 처리
+                    if ext.to_str() == Some("webp") {
+                        match image_decoder::convert_webp(path.to_str().unwrap()) {
+                            Ok(image) => {
+                                let temp_path = input_dir.join(path.file_stem().unwrap()).with_extension("png");
+                                if let Err(e) = image.save(&temp_path) {
+                                    println!("webp 변환 실패: {:?}, {}", path.display(), e);
+                                    continue;
+                                }
+                                println!("webp To png: {:?}", temp_path.display());
+                                temp_path
+                            }
+                            Err(e) => {
+                                println!("webp 변환 오류: {:?}, {}", path.display(), e);
+                                continue;
+                            }
+                        }
+                    }else {
+                        path.clone()
+                    };
+
+
+                    let mut output_file = output_dir.join(path.file_stem().unwrap()); // 파일 이름 가져오기 (확장자 제거)
+                    output_file.set_extension("png"); // 확장자를 "png"로 설정
+
                     let file_start_time = Instant::now();
 
                     match image_processor::process_image(&path, &output_file, session) {
                         Ok(_) => {
                             let file_duration = file_start_time.elapsed();
                             println!(
-                                "✅ Done -> {:?} (time: {:.2?})\n",
+                                "[✔] Done -> {:?} (time: {:.2?})\n",
                                 output_file,
                                 file_duration
                             );
@@ -122,58 +167,3 @@ fn process_directory(
     println!("🕒 전체 디렉토리 처리 완료! 총 소요 시간: {:.2?}", total_duration);
     Ok(())
 }
-
-/*
-fn process_directory(
-    input_dir: &Path,
-    output_dir: &Path,
-    session: Arc<Session>, // 세션을 Arc로 감싸서 공유
-) -> std::io::Result<()> {
-    let start_time = Instant::now();
-
-    // 파일 목록을 Vec<PathBuf>로 수집
-    let files: Vec<PathBuf> = fs::read_dir(input_dir)?
-        .filter_map(Result::ok)
-        .map(|entry| entry.path())
-        .filter(|path| {
-            path.is_file()
-                && path.extension()
-                    .map(|ext| ext == "jpg" || ext == "jpeg" || ext == "png")
-                    .unwrap_or(false)
-        })
-        .collect();
-
-    // 병렬 처리 : 수만장 이상 인물 이미지 처리하기 위해
-    // TODO : 멀티쓰레드로 ONNX 세션 풀을 미리 생성하고 꺼내서 사용하도록
-    files.par_iter().for_each(|path| {
-        let thread_id = thread::current().id(); // 현재 쓰레드 ID 가져오기
-        let output_file = output_dir.join(path.file_name().unwrap());
-        let file_start_time = Instant::now();
-
-        // 각 파일 처리
-        match image_processor::process_image(path, &output_file, &mut *session) {
-            Ok(_) => {
-                let file_duration = file_start_time.elapsed();
-                println!(
-                    "[Thread {:?}] ✅ 처리 완료: {:?} -> {:?} (소요 시간: {:.2?})",
-                    thread_id,
-                    path.display(),
-                    output_file,
-                    file_duration
-                );
-            }
-            Err(e) => println!(
-                "[Thread {:?}] 처리 중 오류 발생: {:?}, {}",
-                thread_id,
-                path.display(),
-                e
-            ),
-        }
-    });
-
-    let total_duration = start_time.elapsed();
-    println!("🕒 전체 디렉토리 처리 완료! 총 소요 시간: {:.2?}", total_duration);
-
-    Ok(())
-}
-*/
